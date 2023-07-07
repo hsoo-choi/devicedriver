@@ -29,6 +29,17 @@ public:
 		{
 		}
 	}
+	void assertIllegalWrite(long address, int data)
+	{
+		try
+		{
+			dd->write(address, data);
+			FAIL();
+		}
+		catch (WriteFailException e)
+		{
+		}
+	}
 protected:
 	void SetUp() override
 	{
@@ -53,4 +64,17 @@ TEST_F(TestFixture, ReadTestFailWithException) {
 		.WillOnce(Return(20));
 
 	assertIllegalRead(0xA);
+}
+
+TEST_F(TestFixture, WriteTestPass) {
+	EXPECT_CALL(md, read).WillOnce(Return(0xFF));
+	EXPECT_CALL(md, write).Times(1);
+
+	dd->write(0xA, 1000);
+}
+
+TEST_F(TestFixture, WriteTestFailWithException) {
+	EXPECT_CALL(md, read).WillOnce(Return(10));
+
+	assertIllegalWrite(0xA, 1000);
 }
